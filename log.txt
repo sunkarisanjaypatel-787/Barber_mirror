@@ -1,0 +1,215 @@
+Initialized native services in: /Users/sanjaypatel/.gradle/native
+Initialized jansi services in: /Users/sanjaypatel/.gradle/native
+The client will now receive all logging from the daemon (pid: 1949). The daemon log file: /Users/sanjaypatel/.gradle/daemon/9.4.1/daemon-1949.out.log
+Starting 11th build in daemon [uptime: 48 mins 27.975 secs, performance: 97%, GC rate: 0.00/s, heap usage: 1% of 2 GiB]
+Using 8 worker leases.
+Operational build model parameters: {cachingModelBuilding=false, configurationCache=false, configurationCacheDisabledReason=null, configurationCacheParallelLoad=false, configurationCacheParallelStore=false, configureOnDemand=false, invalidateCoupledProjects=false, isolatedProjects=false, modelAsProjectDependency=false, modelBuilding=false, parallelModelBuilding=false, parallelProjectConfiguration=false, parallelProjectExecution=false, resilientModelBuilding=false}
+Now considering [/Users/sanjaypatel/coding/projects/barber_mirror] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Resolved plugin [id: 'org.gradle.toolchains.foojay-resolver-convention', version: '1.0.0']
+Settings evaluated using settings file '/Users/sanjaypatel/coding/projects/barber_mirror/settings.gradle.kts'.
+Projects loaded. Root project using build file '/Users/sanjaypatel/coding/projects/barber_mirror/build.gradle.kts'.
+Included projects: [root project 'Barber's mirror', project ':app']
+
+> Configure project :
+Evaluating root project 'Barber's mirror' using build file '/Users/sanjaypatel/coding/projects/barber_mirror/build.gradle.kts'.
+Resolved plugin [id: 'com.android.application', version: '9.2.1', apply: false]
+Resolved plugin [id: 'org.jetbrains.kotlin.plugin.compose', version: '2.2.10', apply: false]
+
+> Configure project :app
+Evaluating project ':app' using build file '/Users/sanjaypatel/coding/projects/barber_mirror/app/build.gradle.kts'.
+Resolved plugin [id: 'com.android.application', version: '9.2.1']
+Resolved plugin [id: 'org.jetbrains.kotlin.plugin.compose', version: '2.2.10']
+Build 7e49e9a4-c776-4a51-a3fc-1823d582b2c8 is started
+Using default execution profile
+Detected Android Gradle Plugin compose compiler configuration
+Detected Android Gradle Plugin compose compiler configuration
+Detected Android Gradle Plugin compose compiler configuration
+Detected Android Gradle Plugin compose compiler configuration
+All projects evaluated.
+Task name matched 'processDebugMainManifest'
+Selected primary task 'processDebugMainManifest' from project :
+Tasks to be executed: [task ':app:preBuild', task ':app:preDebugBuild', task ':app:extractDeepLinksDebug', task ':app:processDebugMainManifest']
+Tasks that were excluded: []
+Resolve mutations for :app:preBuild (Thread[#503,Execution worker,5,main]) started.
+:app:preBuild (Thread[#503,Execution worker,5,main]) started.
+
+> Task :app:preBuild UP-TO-DATE
+Skipping task ':app:preBuild' as it has no actions.
+Resolve mutations for :app:preDebugBuild (Thread[#503,Execution worker,5,main]) started.
+:app:preDebugBuild (Thread[#506,Execution worker Thread 4,5,main]) started.
+
+> Task :app:preDebugBuild UP-TO-DATE
+Skipping task ':app:preDebugBuild' as it has no actions.
+Resolve mutations for :app:extractDeepLinksDebug (Thread[#506,Execution worker Thread 4,5,main]) started.
+:app:extractDeepLinksDebug (Thread[#506,Execution worker Thread 4,5,main]) started.
+
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+Caching disabled for task ':app:extractDeepLinksDebug' because:
+  Build cache is disabled
+Skipping task ':app:extractDeepLinksDebug' as it is up-to-date.
+Resolve mutations for :app:processDebugMainManifest (Thread[#506,Execution worker Thread 4,5,main]) started.
+:app:processDebugMainManifest (Thread[#507,Execution worker Thread 5,5,main]) started.
+
+> Task :app:processDebugMainManifest FAILED
+Caching disabled for task ':app:processDebugMainManifest' because:
+  Build cache is disabled
+Task ':app:processDebugMainManifest' is not up-to-date because:
+  Task has failed previously.
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/50b87088ade079a706a98b2e9b99d423/transformed/camera-video-1.3.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/4f7193aff163fa0b64b5b30562c9a24d/transformed/camera-view-1.3.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/b3466b406fa0d1588f72c150072d5830/transformed/camera-lifecycle-1.3.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/c3d6f85933d2e390ca57b3aadd9ae69f/transformed/camera-camera2-1.3.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/725a240ecd8fe899425989b2cef527f3/transformed/camera-core-1.3.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e46d0fa241a902af9d26e1a0f1eae9a1/transformed/material3/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/f4f33cef4fcd57f35a5ebf343cd4bf58/transformed/material/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/0ae71d294afd23b9a543665b2109b1af/transformed/material-ripple/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/90762c701e739d9e1569d36d0f5fe724/transformed/foundation/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/ac47ba7b879ebe5ad38ae76afa318291/transformed/animation/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/80d063b08b39a4b3f3902d29a54db59b/transformed/foundation-layout/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/619a5eeab685b9d93f1f87bc4942e6cc/transformed/animation-core/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/1f6c96de2106e1f2fde3ec04850229fb/transformed/ui-tooling-data/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/4f7aa34e0f98d29b1637c984beab2470/transformed/ui-unit/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/d0f79103321e0a4e6046318c7e0f6a4a/transformed/ui-geometry/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/38f10fe579ca030bdcdd82f3f9292c98/transformed/ui-util/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/02c050fbc99316cc1243dca6267b651a/transformed/ui-text/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/2572d84ca4c953f6fb96dee5230cf2f9/transformed/ui-tooling-preview/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/019bc0ad6d1e1d4fa9b9f858b737c7f8/transformed/ui-tooling/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/ece49312224f2b2fecdaeae76e32c1c8/transformed/ui-graphics/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/553bd32765838f1add94076e5aeb2ec2/transformed/ui-test-manifest-1.10.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/5b1dc1197395f8d18e59f5a210684b7e/transformed/appcompat-1.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e9ec93221d59c1f2debe91f9c3739569/transformed/fragment-1.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/af1eb259c44ee54ca0e0a9e201be737a/transformed/activity-1.8.2/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/6d2b8eaa212b6b35067224a34d09e843/transformed/activity-ktx-1.8.2/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/80bada7c60fceae2d39267b9a2cc8b7e/transformed/activity-compose-1.8.2/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/3357da38ea87d2907b1efcc1f29de7a1/transformed/runtime-annotation/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/288e497adee35f9b89613fdfb0dceb02/transformed/runtime-retain/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/773009dffbeea60c4fff59de3c6a7b2a/transformed/transition-1.6.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/9b69fefd003fb6bce27e3be6695c6e84/transformed/dynamicanimation-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/d642e6f99eabf6e5f4a03fbacc66ab2b/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/dac2bfc6f045c992880c91e817ee8be3/transformed/loader-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/59ec4d2f52a384bf661f73a95a08aaa9/transformed/emoji2-1.4.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/74f1c102d7120b8304c099990c642295/transformed/appcompat-resources-1.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/25c4114a66db07429765ac3f3ff4a5ad/transformed/drawerlayout-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/4ac1d9a9f7b3e5234d60a1c33214b6de/transformed/autofill-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/585bc1e72412b9e03a014d5811fe7790/transformed/window-core/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/67093e2d9c5c6fc2b79dc3998248c73e/transformed/window-1.5.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/855dfda163989e5c235abd1d18a16b96/transformed/graphics-path-1.0.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/c96ad0482f6c71145ea9bbc18e97688c/transformed/viewpager-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/d192a86bb6f93439bab4ce68750d627f/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/8d7b5ff07609d92e1afdfe5cf7867839/transformed/vectordrawable-1.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e6155b753fc24a7e99e3281c1ba531b5/transformed/customview-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/13f73c0f77b42ada70b090f78e7d1711/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/8158ae200ed5659bc0e0eafc4554477f/transformed/core-ktx-1.16.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/b497d4e7e1a065040247f69403015310/transformed/core-1.16.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/2f945211b9764e8216fa2d1a9d13bfef/transformed/lifecycle-viewmodel-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/55d33db9ae8cf903e949506daa333823/transformed/lifecycle-viewmodel-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/4471639b926773da8face1108788a652/transformed/lifecycle-runtime-ktx/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/f436d98dbec86c46e533718ca80de852/transformed/lifecycle-runtime-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e60a6a2bf2f5afb086487e45ef412e4a/transformed/lifecycle-process-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/8402e7e957bcb2e8018a5f01b259615a/transformed/lifecycle-viewmodel-ktx-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/bcd99496a0a5b86b7b344e38acf54bf1/transformed/lifecycle-livedata-core-ktx-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/a9a35f535fb40e12bd3361fa147298cb/transformed/lifecycle-livedata-core-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/5322b519625acf383b4a08bf1f0e5cf9/transformed/lifecycle-livedata-2.9.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/ff82389895af44d88dd4f2a586ddca78/transformed/lifecycle-viewmodel-savedstate-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/4d6d102a0e46b24394b2aafaacd1df64/transformed/savedstate-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/3e8a415c50ce642d2a147fb9e35d78ef/transformed/savedstate-ktx-1.3.2/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/96d686ceecf18e5ba6a26c4737976ac1/transformed/savedstate-compose/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/bb9fad9b48298f1f597a45e8dc3148e7/transformed/runtime/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/165ada8e5509f392d1ed4f5d3a08ec6d/transformed/runtime-saveable/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/095d8c6dfd039e7dfb4f585ec04c09db/transformed/lifecycle-runtime-compose-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/d65b0441079256af8d4de53fff77bad3/transformed/lifecycle-viewmodel-compose-release/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/0ea4d4b9a234e4e991e2a60e39315277/transformed/ui/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/6248087c3da8c817878ad7965c6f9566/transformed/annotation-experimental-1.4.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/86295d76956204801288c04c5c1bf459/transformed/versionedparcelable-1.1.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/6792070b5ce046839228e337ef32e9ed/transformed/core-viewtree-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/d9a225c897cebc45893812c23e896685/transformed/tasks-vision-0.10.10/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/0d63dd0ba35acf290fd1b2ffa08bdb27/transformed/exifinterface-1.3.2/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/ea87985d51deca8c64eab70b5631fb18/transformed/cursoradapter-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/7e64ef8320c5f64fd24b3c0327d5b1b8/transformed/tasks-core-0.10.10/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/5f4a9f2af4f189fbabdd1047755419ef/transformed/transport-backend-cct-3.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/5c664480f0debfd865ff3cb1b99e2219/transformed/transport-runtime-3.1.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/de61095ddd75f5b27335bd709bd4e610/transformed/transport-api-3.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/6f017c93a46937b3c3d62a9617ef2586/transformed/profileinstaller-1.4.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/60a70619be2c09f2bf2c3eab3a2325d8/transformed/firebase-encoders-json-18.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e39bf66820cd0324ec4eac03d6218aaf/transformed/startup-runtime-1.1.1/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/3bd4b92beefa94950fee9a575bc495bd/transformed/tracing-1.2.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/70e76a12c9ffcf72409fb82ea11eb441/transformed/interpolator-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/9fe3d13fe7b605ba5d67879f42ed381a/transformed/core-runtime-2.2.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/94255ef66d524728ebe0c2c9c3fdde0d/transformed/documentfile-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/399a01b38f19dba23f5ce7e70dc1894c/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/0b3176ace77d593ba66db4c934405cd0/transformed/print-1.0.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/c6d74aed7c39562817f150e6a201500a/transformed/tensorflow-lite-support-0.4.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/e6f646182c8f8af14a0d679cfffabc42/transformed/tensorflow-lite-2.14.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/5ae516c5e7ba7c22d100acb54e726515/transformed/tensorflow-lite-support-api-0.4.4/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/66783295bbd8fc08117059114b01ff9e/transformed/tensorflow-lite-api-2.14.0/AndroidManifest.xml
+Loading library manifest /Users/sanjaypatel/.gradle/caches/9.4.1/transforms/8db1ed0e26c958f27eb5d4c1ebbbb244/transformed/image-1.0.0-beta1/AndroidManifest.xml
+Merging main manifest /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml
+
+Merging result: ERROR
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:3:1-31:12
+	xmlns:tools
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:4:5-51
+	xmlns:android
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:3:11-69
+uses-permission#android.permission.CAMERA
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:6:5-65
+	android:name
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:6:22-62
+uses-feature#android.hardware.camera.any
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:7:5-88
+	android:required
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:7:62-85
+	android:name
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:7:19-61
+application
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:8:5-29:19
+	android:supportsRtl
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:15:9-35
+	android:label
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:13:9-41
+	android:fullBackupContent
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:11:9-54
+	android:roundIcon
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:14:9-54
+	android:icon
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:12:9-43
+	android:allowBackup
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:9:9-35
+	android:theme
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:16:9-51
+	android:dataExtractionRules
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:10:9-65
+	tools:replace
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:17:9-74
+activity#com.solo.barbersmirror.MainActivity
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:18:9-28:20
+	android:label
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:21:13-45
+	android:exported
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:20:13-36
+	android:theme
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:22:13-55
+	android:name
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:19:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:23:13-27:29
+action#android.intent.action.MAIN
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:24:17-69
+	android:name
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:24:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:26:17-77
+	android:name
+		ADDED from /Users/sanjaypatel/coding/projects/barber_mirror/app/src/main/AndroidManifest.xml:26:27-74
+
+
+See https://developer.android.com/r/studio-ui/build/manifest-merger for more information about the manifest merger.
+
+Build 7e49e9a4-c776-4a51-a3fc-1823d582b2c8 is closed
+2 actionable tasks: 1 executed, 1 up-to-date
+Watched directory hierarchies: [/Users/sanjaypatel/coding/projects/barber_mirror]

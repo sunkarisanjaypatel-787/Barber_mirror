@@ -1,0 +1,5 @@
+oblong
+oval
+round
+square
+triangle

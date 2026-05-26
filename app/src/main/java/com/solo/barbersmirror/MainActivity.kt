@@ -409,78 +409,77 @@ fun CyberpunkScanner(hasPermission: Boolean) {
 fun CameraPreview(
     imageCapture: ImageCapture,
     faceLandmarker: FaceLandmarker?,
-    lensFacing: Int, // <-- INJECT THE STATE PARAMETER
+    lensFacing: Int,
     onAlignmentChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-    // Dedicated background thread for live math execution
     val analyzerExecutor = remember { Executors.newSingleThreadExecutor() }
+    
+    // 1. Decouple the View initialization from the Camera logic
+    val previewView = remember { PreviewView(context) }
 
-    AndroidView(
-        factory = { ctx ->
-            val previewView = PreviewView(ctx)
-            val mainExecutor = ContextCompat.getMainExecutor(ctx)
+    // 2. THE HARDWARE REBOOT TRIGGER
+    // This block automatically re-executes every time 'lensFacing' changes
+    LaunchedEffect(lensFacing) {
+        val cameraProvider = cameraProviderFuture.get()
+        
+        val preview = Preview.Builder().build().also {
+            it.setSurfaceProvider(previewView.surfaceProvider)
+        }
 
-            cameraProviderFuture.addListener({
-                val cameraProvider = cameraProviderFuture.get()
-                val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
-
-                // --- THE LIVE TELEMETRY LOOP ---
-                val imageAnalyzer = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-                    .also { analysis ->
-                        analysis.setAnalyzer(analyzerExecutor) { imageProxy ->
-                            if (faceLandmarker != null) {
-                                try {
-                                    val bitmap = imageProxy.toBitmap()
-                                    val matrix = Matrix().apply {
-                                        postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
-                                        
-                                        // CONDITIONAL MIRRORING FOR LIVE FEED
-                                        if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                                            postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
-                                        }
-                                    }
-                                    val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-                                    val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
-                                    val mpImage = BitmapImageBuilder(argbBitmap).build()
-
-                                    val result = faceLandmarker.detect(mpImage)
-                                    if (result.faceLandmarks().isNotEmpty()) {
-                                        val isAligned = GoldenVectorEngine.isFaceAligned(result.faceLandmarks()[0])
-                                        onAlignmentChange(isAligned) // Stream status to UI
-                                    } else {
-                                        onAlignmentChange(false) // No face detected
-                                    }
-                                } catch (e: Exception) {
-                                    // Drop frame silently if engine lags
+        val imageAnalyzer = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also { analysis ->
+                analysis.setAnalyzer(analyzerExecutor) { imageProxy ->
+                    if (faceLandmarker != null) {
+                        try {
+                            val bitmap = imageProxy.toBitmap()
+                            val matrix = Matrix().apply {
+                                postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+                                
+                                // CONDITIONAL MIRRORING (Now safely updates with state)
+                                if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                                    postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
                                 }
                             }
-                            imageProxy.close() // CRITICAL: Free the buffer
+                            val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                            val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
+                            val mpImage = BitmapImageBuilder(argbBitmap).build()
+
+                            val result = faceLandmarker.detect(mpImage)
+                            if (result.faceLandmarks().isNotEmpty()) {
+                                val isAligned = GoldenVectorEngine.isFaceAligned(result.faceLandmarks()[0])
+                                onAlignmentChange(isAligned)
+                            } else {
+                                onAlignmentChange(false)
+                            }
+                        } catch (e: Exception) {
+                            // Drop frame silently if engine lags
                         }
                     }
-
-                // OVERWRITE THE HARDCODED SELECTOR
-                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-
-                try {
-                    cameraProvider.unbindAll()
-                    // Bind the Analyzer alongside the Preview and Capture
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner, cameraSelector, preview, imageCapture, imageAnalyzer
-                    )
-                } catch (e: Exception) {
-                    println("OPTICAL BRIDGE FAILURE: ${e.message}")
+                    imageProxy.close() // CRITICAL: Free the buffer
                 }
-            }, mainExecutor)
+            }
 
-            previewView
-        },
+        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+
+        try {
+            // 3. Purge the old camera feed and bind the new one
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner, cameraSelector, preview, imageCapture, imageAnalyzer
+            )
+        } catch (e: Exception) {
+            println("OPTICAL BRIDGE FAILURE: ${e.message}")
+        }
+    }
+
+    // 4. A clean, passive AndroidView that just renders whatever LaunchedEffect feeds it
+    AndroidView(
+        factory = { previewView },
         modifier = Modifier.fillMaxSize()
     )
 }

@@ -484,6 +484,3 @@ fun CameraPreview(
         modifier = Modifier.fillMaxSize()
     )
 }
-
-
-

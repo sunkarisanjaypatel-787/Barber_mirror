@@ -357,7 +357,12 @@ fun CyberpunkScanner(hasPermission: Boolean) {
 
                     if (targetShape != "ERROR" && targetShape != "SYS_ERR" && targetShape != "MATH_ERR" && targetShape != "NO_TARGET" && targetShape != "RE-ALIGN FACE") {
                         Text("OPTIMAL HAIRSTYLES:", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(bottom = 8.dp))
-                        Text("> ASSET DATABASE PENDING...", color = Color.Gray, fontSize = 14.sp)
+                        
+                        // THE MATRIX INTEGRATION
+                        val recommendations = HairstyleDatabase.getRecommendations(targetShape)
+                        recommendations.forEach { style ->
+                            Text("> $style", color = Color(0xFF00FFCC), fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(30.dp))

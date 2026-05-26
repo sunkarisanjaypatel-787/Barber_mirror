@@ -5,7 +5,7 @@ from core_logic.vision_engine import get_recommendations # We only need the JSON
 
 # The Tailscale IP of your MacBook M2
 OPS_SERVER_URL = "http://100.124.57.75:8000/analyze_biometrics"
-UPLOAD_PATH = os.path.join("assets", "uploads")
+UPLOAD_PATH = os.path.join(os.path.dirname(__file__), "assets", "uploads")
 os.makedirs(UPLOAD_PATH, exist_ok=True)
 
 TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
@@ -128,4 +128,6 @@ def main(page: ft.Page):
     page.add(header, status_text, display_container, result_display, hairline_toggle, scan_btn, gallery_row)
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="assets", upload_dir="assets/uploads")
+    ft.app(target=main,
+           assets_dir=os.path.join(os.path.dirname(__file__), "assets"),
+           upload_dir=os.path.join(os.path.dirname(__file__), "assets", "uploads"))

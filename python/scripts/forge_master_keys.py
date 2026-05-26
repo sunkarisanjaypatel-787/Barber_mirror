@@ -13,9 +13,12 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 # --- CONFIGURATION ---
-DATA_DIR = "dataset"  # Ensure your SQUARE, ROUND, OVAL, OBLONG folders are inside here
-OUTPUT_JSON = "master_keys.json"
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "../assets")
+DATA_DIRS = [
+    os.path.join(os.path.dirname(__file__), "../../app/src/main/assets/golden_vector_images"),
+    os.path.join(os.path.dirname(__file__), "../../app/src/main/others")
+]
+OUTPUT_JSON = os.path.join(os.path.dirname(__file__), "../models/master_keys.json")
+MODEL_DIR = os.path.join(os.path.dirname(__file__), "../../app/src/main/assets")
 MODEL_PATH = os.path.join(MODEL_DIR, "face_landmarker.task")
 
 def ensure_model_exists():
@@ -73,25 +76,30 @@ def forge_keys():
     master_keys = {}
 
     for shape in target_shapes:
-        shape_path = os.path.join(DATA_DIR, shape)
-        if not os.path.exists(shape_path):
-            print(f"[-] WARNING: Directory {shape} not found.")
-            continue
-            
-        print(f"[*] Extracting telemetry for {shape}...")
         shape_vectors = []
         
-        for img_name in os.listdir(shape_path):
-            if not img_name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')): 
+        for data_dir in DATA_DIRS:
+            # Check for both uppercase and lowercase folder names
+            shape_path = os.path.join(data_dir, shape)
+            if not os.path.exists(shape_path):
+                shape_path = os.path.join(data_dir, shape.lower())
+
+            if not os.path.exists(shape_path):
                 continue
                 
-            img_path = os.path.join(shape_path, img_name)
-            vector = extract_ratios(img_path)
+            print(f"[*] Extracting telemetry for {shape} from {os.path.basename(data_dir)}...")
             
-            if vector:
-                shape_vectors.append(vector)
-            else:
-                print(f"    [-] FAILED to map: {img_name}")
+            for img_name in os.listdir(shape_path):
+                if not img_name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                    continue
+
+                img_path = os.path.join(shape_path, img_name)
+                vector = extract_ratios(img_path)
+
+                if vector:
+                    shape_vectors.append(vector)
+                else:
+                    print(f"    [-] FAILED to map: {img_name}")
                 
         if shape_vectors:
             # Average the vectors to create the Golden Vector
@@ -99,6 +107,8 @@ def forge_keys():
             # Rounding to 4 decimal places for clean JSON formatting
             master_keys[shape] = [round(num, 4) for num in golden_vector]
             print(f"    [+] {shape} Golden Vector Forged: {len(shape_vectors)} assets merged.")
+        else:
+            print(f"[-] WARNING: No data found for {shape}.")
 
     # Secure the payload
     with open(OUTPUT_JSON, 'w') as f:

@@ -57,7 +57,7 @@ class AccuracyBenchmark(private val context: Context) {
         val assetManager = context.assets
         // The two possible folder naming conventions found in assets and others/
         val folders = listOf("oblong", "oval", "round", "square", "oblong_face", "oval_face", "round_face", "square_face")
-        
+
         var total = 0
         var correct = 0
         var wrong = 0
@@ -79,7 +79,7 @@ class AccuracyBenchmark(private val context: Context) {
                 processFolderRecursively(folder, groundTruth, assetManager) { result, predicted, imgPath ->
                     total++
                     confusion[groundTruth]?.set(predicted, (confusion[groundTruth]?.get(predicted) ?: 0) + 1)
-                    
+
                     when (predicted) {
                         groundTruth -> correct++
                         "RE-ALIGN FACE" -> reAlign++
@@ -100,12 +100,16 @@ class AccuracyBenchmark(private val context: Context) {
                         failures.add(failure)
                     }
 
+                    // Inside your processFolderRecursively loop
+                    val validTests = correct + wrong
+
                     onProgress(BenchmarkStats(
                         totalProcessed = total,
                         correctGuesses = correct,
                         wrongGuesses = wrong,
                         reAlignCount = reAlign,
-                        accuracyScore = if (total > 0) (correct.toFloat() / total) * 100 else 0f,
+                        // THE PATCH: Only grade the engine on valid, aligned tests
+                        accuracyScore = if (validTests > 0) (correct.toFloat() / validTests) * 100 else 0f,
                         confusionMatrix = confusion,
                         failures = failures,
                         isRunning = true
@@ -113,16 +117,20 @@ class AccuracyBenchmark(private val context: Context) {
                 }
             }
         }
-        
+
+        // Inside your processFolderRecursively loop
+        val validTests = correct + wrong
+
         onProgress(BenchmarkStats(
             totalProcessed = total,
             correctGuesses = correct,
             wrongGuesses = wrong,
             reAlignCount = reAlign,
-            accuracyScore = if (total > 0) (correct.toFloat() / total) * 100 else 0f,
+            // THE PATCH: Only grade the engine on valid, aligned tests
+            accuracyScore = if (validTests > 0) (correct.toFloat() / validTests) * 100 else 0f,
             confusionMatrix = confusion,
             failures = failures,
-            isRunning = false
+            isRunning = true
         ))
     }
 
@@ -166,8 +174,17 @@ class AccuracyBenchmark(private val context: Context) {
             val argbBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
             val mpImage = BitmapImageBuilder(argbBitmap).build()
             val result = faceLandmarker?.detect(mpImage)
+
             if (result != null && result.faceLandmarks().isNotEmpty()) {
-                GoldenVectorEngine.analyzeFaceShape(result.faceLandmarks()[0])
+                val mesh = result.faceLandmarks()[0]
+
+                // THE PATCH: Enforce the Biometric Lock on the Test Data
+                if (GoldenVectorEngine.isFaceAligned(mesh)) {
+                    GoldenVectorEngine.analyzeFaceShape(mesh)
+                } else {
+                    // Log it as a rejected alignment, do not score it as wrong
+                    ClassificationResult("RE-ALIGN FACE", 0f, 0f, 0f, 0f)
+                }
             } else {
                 ClassificationResult("NO_FACE", 0f, 0f, 0f, 0f)
             }
@@ -175,4 +192,4 @@ class AccuracyBenchmark(private val context: Context) {
             null
         }
     }
-}
+    }

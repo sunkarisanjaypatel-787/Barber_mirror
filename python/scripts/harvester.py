@@ -33,8 +33,10 @@ target_shapes = {
 }
 
 # The Extraction Loop
+BASE_DIR = os.path.join(os.path.dirname(__file__), "../dataset")
+
 for shape, queries in target_shapes.items():
-    output_dir = f"dataset/{shape}"
+    output_dir = os.path.join(BASE_DIR, shape)
     os.makedirs(output_dir, exist_ok=True)
     
     print(f"\n[+] LOCKING TARGET: {shape.upper()} FACE GEOMETRY")

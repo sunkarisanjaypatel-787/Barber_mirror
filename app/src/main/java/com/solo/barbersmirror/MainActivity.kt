@@ -88,6 +88,9 @@ fun CyberpunkScanner(hasPermission: Boolean) {
     var capturedImage by remember { mutableStateOf<Bitmap?>(null) }
     var isLiveAligned by remember { mutableStateOf(false) }
 
+    // 1. INJECT LENS STATE (Defaults to Front)
+    var lensFacing by remember { mutableStateOf(CameraSelector.LENS_FACING_FRONT) }
+
     // --- THE REACTIVE HUD LOGIC ---
     val hudColor = when {
         currentState == ScannerState.TARGETING && !isLiveAligned -> Color.Red
@@ -212,6 +215,7 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                 CameraPreview(
                     imageCapture = imageCapture,
                     faceLandmarker = faceLandmarker,
+                    lensFacing = lensFacing,
                     onAlignmentChange = { aligned ->
                         isLiveAligned = aligned // Updates UI instantly
                     }
@@ -290,8 +294,11 @@ fun CyberpunkScanner(hasPermission: Boolean) {
 
                                             val matrix = Matrix().apply {
                                                 postRotate(image.imageInfo.rotationDegrees.toFloat())
-                                                // Mirror for front camera, but DON'T mirror if you want "as seen by others"
-                                                postScale(-1f, 1f, rawBitmap.width / 2f, rawBitmap.height / 2f)
+                                                
+                                                // 2. CONDITIONAL MIRRORING (Only mirror the front camera)
+                                                if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                                                    postScale(-1f, 1f, rawBitmap.width / 2f, rawBitmap.height / 2f)
+                                                }
                                             }
                                             val rotatedBitmap = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
                                             val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -318,8 +325,19 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                         // Invisible text, it's just a white circle like a real camera
                     }
 
-                    // Placeholder to balance the row
-                    Spacer(modifier = Modifier.width(90.dp))
+                    // INJECT THE CAMERA FLIP BUTTON
+                    Button(
+                        onClick = { 
+                            lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                                CameraSelector.LENS_FACING_BACK
+                            } else {
+                                CameraSelector.LENS_FACING_FRONT
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+                    ) {
+                        Text("FLIP LENS", color = Color.White)
+                    }
                 }
             }
 
@@ -391,6 +409,7 @@ fun CyberpunkScanner(hasPermission: Boolean) {
 fun CameraPreview(
     imageCapture: ImageCapture,
     faceLandmarker: FaceLandmarker?,
+    lensFacing: Int, // <-- INJECT THE STATE PARAMETER
     onAlignmentChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
@@ -421,7 +440,11 @@ fun CameraPreview(
                                     val bitmap = imageProxy.toBitmap()
                                     val matrix = Matrix().apply {
                                         postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
-                                        postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f) // Mirror
+                                        
+                                        // CONDITIONAL MIRRORING FOR LIVE FEED
+                                        if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                                            postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
+                                        }
                                     }
                                     val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                                     val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -442,7 +465,8 @@ fun CameraPreview(
                         }
                     }
 
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+                // OVERWRITE THE HARDCODED SELECTOR
+                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
                 try {
                     cameraProvider.unbindAll()

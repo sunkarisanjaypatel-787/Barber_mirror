@@ -53,11 +53,10 @@ import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
-import com.solo.barbersmirror.ui.DiagnosticDashboard
 
 // THE STATE MACHINE
 enum class ScannerState {
-    TARGETING, PROCESSING, LOCKED, DIAGNOSTIC
+    TARGETING, PROCESSING, LOCKED,
 }
 
 class MainActivity : ComponentActivity() {
@@ -205,10 +204,7 @@ fun CyberpunkScanner(hasPermission: Boolean) {
         }
     )
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        if (currentState == ScannerState.DIAGNOSTIC) {
-            DiagnosticDashboard(onClose = { currentState = ScannerState.TARGETING })
-        } else if (hasPermission) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) { if (hasPermission) {
 
             // --- LAYER 1: THE VISUAL FEED ---
             if (currentState == ScannerState.TARGETING || currentState == ScannerState.PROCESSING) {
@@ -248,10 +244,8 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                     Text(
                         text = "ALIGN FACE WITHIN BRACKETS",
                         color = Color(0xFF00FFCC),
-                        modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp)
-                            .pointerInput(Unit) {
-                                detectTapGestures(onLongPress = { currentState = ScannerState.DIAGNOSTIC })
-                            },
+                        // PRODUCTION PATCH: Severed the long-press backdoor pointer input
+                        modifier = Modifier.align(Alignment.TopCenter).padding(top = 80.dp),
                         letterSpacing = 2.sp
                     )
                 }

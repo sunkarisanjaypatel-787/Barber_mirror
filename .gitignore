@@ -13,4 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-/python/neural_env/
+/python/neural_env/*.apk
+*.dm
+*.jks

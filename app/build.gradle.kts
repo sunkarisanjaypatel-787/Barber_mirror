@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -70,8 +71,11 @@ dependencies {
     implementation("com.google.mediapipe:tasks-vision:0.10.10")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
     // LiteRT (The 16KB-aligned successor to TensorFlow Lite)
     implementation("com.google.ai.edge.litert:litert:1.4.0")
     implementation("com.google.ai.edge.litert:litert-support:1.4.0")
 
+    // PROTOCOL V2.0: The 3D Rendering Engine (SceneView / Filament)
+    implementation("io.github.sceneview:sceneview:4.11.2")
 }

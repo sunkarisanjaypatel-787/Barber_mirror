@@ -16,3 +16,5 @@ local.properties
 /python/neural_env/*.apk
 *.dm
 *.jks
+diagnostics
+

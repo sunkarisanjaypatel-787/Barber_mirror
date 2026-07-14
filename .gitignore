@@ -18,3 +18,4 @@ local.properties
 *.jks
 diagnostics
 
+/tree.txt

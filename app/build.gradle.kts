@@ -2,6 +2,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    //id("com.android.application")
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 // Place this at the top level of app/build.gradle.kts to prevent D8 duplicate class crashes
 configurations.all {
@@ -23,11 +26,18 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // ENABLE R8
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
         }
     }
     compileOptions {
@@ -78,4 +88,13 @@ dependencies {
 
     // PROTOCOL V2.0: The 3D Rendering Engine (SceneView / Filament)
     implementation("io.github.sceneview:sceneview:4.11.2")
+
+    // Coil Image Loader (With Compose support)
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    // Add the Google services Gradle plugin
+    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
+    implementation("com.google.firebase:firebase-config")
+    implementation("com.google.firebase:firebase-analytics")
+    // Forces the compiler to use a modern Fragment version, resolving the ActivityResult Lint crash
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 }

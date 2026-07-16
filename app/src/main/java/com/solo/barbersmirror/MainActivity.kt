@@ -21,7 +21,6 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,8 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +56,14 @@ import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
+import androidx.compose.ui.graphics.graphicsLayer
+
+// --- CLOUD ROUTING IMPORTS ---
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 enum class ScannerState {
     TARGETING, PROCESSING, LOCKED
@@ -91,7 +96,60 @@ fun CyberpunkScanner(hasPermission: Boolean) {
     var rawTelemetry by remember { mutableStateOf("") }
     var capturedImage by remember { mutableStateOf<Bitmap?>(null) }
     var isLiveAligned by remember { mutableStateOf(false) }
-    var lensFacing by remember { mutableIntStateOf(CameraSelector.LENS_FACING_FRONT) }
+
+    // Remote Config State
+    var catalogManifest by remember { mutableStateOf(JSONObject()) }
+
+    // Initialize Firebase Remote Config
+    val scope = rememberCoroutineScope()
+    val firebaseUrl = "https://firebasestorage.googleapis.com/v0/b/barbermirror-core/o/"
+
+    LaunchedEffect(Unit) {
+        val remoteConfig = FirebaseRemoteConfig.getInstance()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(3600)
+            .build()
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val jsonStr = remoteConfig.getString("catalog_manifest")
+                val version = remoteConfig.getLong("catalog_version").toInt()
+                if (jsonStr.isNotEmpty()) {
+                    try {
+                        val manifest = JSONObject(jsonStr)
+                        catalogManifest = manifest
+                        
+                        // OTA UPDATER INTEGRATION
+                        if (manifest.has("ota_update_matrix")) {
+                            val otaMatrix = manifest.getJSONObject("ota_update_matrix")
+                            val currentVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+                            } else {
+                                @Suppress("DEPRECATION")
+                                context.packageManager.getPackageInfo(context.packageName, 0).versionCode.toLong()
+                            }
+                            val targetVersionCode = otaMatrix.getLong("latest_version_code")
+                            
+                            if (targetVersionCode > currentVersionCode) {
+                                val versionStr = otaMatrix.getString("latest_version_name")
+                                val apkUrl = otaMatrix.getString("binary_url")
+                                val expectedSha256 = otaMatrix.getString("binary_sha256")
+                                
+                                SilentTelemetry.recordEvent(context, "OTA_TRIGGERED: v$versionStr")
+                                OTAUpdater(context).downloadAndInstall(apkUrl, versionStr, targetVersionCode, expectedSha256)
+                            }
+                        }
+
+                        // Fire-and-forget background synchronization daemon
+                        scope.launch {
+                            synchronizeCatalog(context, version, manifest, firebaseUrl)
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
 
     val hudColor = when {
         currentState == ScannerState.TARGETING && !isLiveAligned -> Color.Red
@@ -148,11 +206,13 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                 rawTelemetry = "BIOMETRIC LOCK SECURED | H/W: ${"%.2f".format(result3D.lRatio)} | J/W: ${"%.2f".format(result3D.fRatio)}"
                 capturedImage = argbBitmap
                 currentState = ScannerState.LOCKED
+                SilentTelemetry.recordEvent(context, "SCAN_SUCCESS: $targetShape")
             } else {
                 targetShape = "RE-ALIGN FACE"
                 rawTelemetry = "ALIGN FACE STRAIGHT INTO CAMERA"
                 capturedImage = argbBitmap
                 currentState = ScannerState.LOCKED
+                SilentTelemetry.recordEvent(context, "SCAN_FAIL: ALIGNMENT_ERROR")
             }
 
         } catch (_: Exception) {
@@ -178,8 +238,7 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                     currentState = ScannerState.PROCESSING
                     val argbBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
                     runAnalysis(argbBitmap)
-                } catch (_: Exception) {
-                }
+                } catch (_: Exception) {}
             }
         }
     )
@@ -190,19 +249,19 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                 CameraPreview(
                     imageCapture = imageCapture,
                     faceLandmarker = faceLandmarker,
-                    lensFacing = lensFacing,
                     onAlignmentChange = { aligned ->
                         isLiveAligned = aligned
                     }
                 )
             } else if (currentState == ScannerState.LOCKED && capturedImage != null) {
-                Image(
+                // AsyncImage fallback requires Coil; we use standard Image for the captured bitmap
+                androidx.compose.foundation.Image(
                     bitmap = capturedImage!!.asImageBitmap(),
                     contentDescription = "Captured Scan",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                // Darken the background to make the catalog pop
+                // Darken the background to make the cloud catalog pop
                 Box(modifier = Modifier.fillMaxSize().background(Color(0x88000000)))
             }
 
@@ -232,68 +291,59 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .padding(bottom = 60.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
-                        onClick = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-                    ) {
-                        Text("GALLERY", color = Color.White)
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Button(
+                            onClick = { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+                        ) {
+                            Text("GALLERY", color = Color.White)
+                        }
                     }
 
-                    Button(
-                        onClick = {
-                            if (isLiveAligned) {
-                                currentState = ScannerState.PROCESSING
-                                imageCapture.takePicture(
-                                    ContextCompat.getMainExecutor(context),
-                                    object : ImageCapture.OnImageCapturedCallback() {
-                                        override fun onCaptureSuccess(image: ImageProxy) {
-                                            val buffer: ByteBuffer = image.planes[0].buffer
-                                            val bytes = ByteArray(buffer.remaining())
-                                            buffer.get(bytes)
-                                            val rawBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Button(
+                            onClick = {
+                                if (isLiveAligned) {
+                                    currentState = ScannerState.PROCESSING
+                                    imageCapture.takePicture(
+                                        ContextCompat.getMainExecutor(context),
+                                        object : ImageCapture.OnImageCapturedCallback() {
+                                            override fun onCaptureSuccess(image: ImageProxy) {
+                                                val buffer: ByteBuffer = image.planes[0].buffer
+                                                val bytes = ByteArray(buffer.remaining())
+                                                buffer.get(bytes)
+                                                val rawBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
 
-                                            val matrix = Matrix().apply {
-                                                postRotate(image.imageInfo.rotationDegrees.toFloat())
-                                                if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                                                val matrix = Matrix().apply {
+                                                    postRotate(image.imageInfo.rotationDegrees.toFloat())
                                                     postScale(-1f, 1f, rawBitmap.width / 2f, rawBitmap.height / 2f)
                                                 }
+                                                val rotatedBitmap = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
+                                                val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
+
+                                                image.close()
+                                                runAnalysis(argbBitmap)
                                             }
-                                            val rotatedBitmap = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
-                                            val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
 
-                                            image.close()
-                                            runAnalysis(argbBitmap)
+                                            override fun onError(exc: ImageCaptureException) {
+                                                currentState = ScannerState.TARGETING
+                                            }
                                         }
-
-                                        override fun onError(exc: ImageCaptureException) {
-                                            currentState = ScannerState.TARGETING
-                                        }
-                                    }
-                                )
-                            }
-                        },
-                        modifier = Modifier.size(80.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isLiveAligned) Color.White else Color.DarkGray
-                        )
-                    ) {}
-
-                    Button(
-                        onClick = {
-                            lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                                CameraSelector.LENS_FACING_BACK
-                            } else {
-                                CameraSelector.LENS_FACING_FRONT
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-                    ) {
-                        Text("FLIP LENS", color = Color.White)
+                                    )
+                                }
+                            },
+                            modifier = Modifier.size(80.dp),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isLiveAligned) Color.White else Color.DarkGray
+                            )
+                        ) {}
                     }
+
+                    // Spacer to maintain original 3-button layout metrics
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
 
@@ -309,30 +359,28 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                 }
             }
 
-            // --- THE 2D CATALOG & HERO UI ---
+            // --- THE COIL CLOUD ROUTER UI ---
             if (currentState == ScannerState.LOCKED && targetShape != "ERROR" && targetShape != "SYS_ERR" && targetShape != "MATH_ERR" && targetShape != "NO_TARGET" && targetShape != "RE-ALIGN FACE") {
 
                 val shapeLower = targetShape.lowercase()
-                val hairline = "solid_hairline" // Can be made dynamic later
-                val basePath = "hair_models/${shapeLower}_face/$hairline"
 
-                // Scan directory for available _front.png styles
-                val availableStyles = remember(targetShape) {
-                    try {
-                        context.assets.list(basePath)?.filter { it.endsWith("_front.png") } ?: emptyList()
-                    } catch (_: Exception) {
-                        emptyList()
+                // Extract valid style indices from Remote Config JSON
+                val availableStyles = remember(targetShape, catalogManifest) {
+                    val jsonArray = catalogManifest.optJSONArray(shapeLower)
+                    if (jsonArray != null) {
+                        List(jsonArray.length()) { jsonArray.getInt(it) }
+                    } else {
+                        (1..5).toList() // Fallback if Remote Config fails
                     }
                 }
 
-                // UI States
-                var focusedStyle by remember { mutableStateOf<String?>(null) }
+                var focusedStyleId by remember { mutableStateOf<Int?>(null) }
                 var show360 by remember { mutableStateOf(false) }
                 var scale by remember { mutableFloatStateOf(1f) }
                 var offset by remember { mutableStateOf(Offset.Zero) }
 
-                if (focusedStyle == null) {
-                    // LAYER 1A: THE ASSET GRID
+                if (focusedStyleId == null) {
+                    // LAYER 1A: THE HIGH-PERFORMANCE LOCAL ASSET GRID
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         contentPadding = PaddingValues(16.dp),
@@ -340,24 +388,36 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 60.dp, bottom = 200.dp) // Space for HUD
+                            .padding(top = 60.dp, bottom = 200.dp)
                     ) {
-                        items(availableStyles) { styleFileName ->
-                            val path = "$basePath/$styleFileName"
-                            val bmp = remember(path) {
-                                try { BitmapFactory.decodeStream(context.assets.open(path)) } catch (_: Exception) { null }
+                        items(availableStyles) { styleId ->
+                            val fileName = "${shapeLower}_solid_front_${styleId}.webp"
+                            
+                            // Try fetching from persistent local catalog storage first
+                            val localCacheFile = java.io.File(context.filesDir, "catalog_matrix_cache/$fileName")
+                            val bmp = remember(localCacheFile.absolutePath, styleId) {
+                                try {
+                                    if (localCacheFile.exists()) {
+                                        BitmapFactory.decodeFile(localCacheFile.absolutePath)
+                                    } else {
+                                        // Legacy local asset fallback to keep sequences fluid
+                                        val fallbackPath = "hair_models/${shapeLower}_face/front/${shapeLower}_solid_front_${styleId}.webp"
+                                        BitmapFactory.decodeStream(context.assets.open(fallbackPath))
+                                    }
+                                } catch (_: Exception) { null }
                             }
+
                             if (bmp != null) {
-                                Image(
+                                androidx.compose.foundation.Image(
                                     bitmap = bmp.asImageBitmap(),
-                                    contentDescription = "Style Option",
+                                    contentDescription = "Style Option $styleId",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .aspectRatio(1f) // Keep images square in the grid
+                                        .aspectRatio(1f)
                                         .clip(RoundedCornerShape(12.dp))
                                         .border(2.dp, Color(0xFF00FFCC).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                                         .clickable {
-                                            focusedStyle = styleFileName
+                                            focusedStyleId = styleId
                                             scale = 1f
                                             offset = Offset.Zero
                                         }
@@ -366,38 +426,58 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                         }
                     }
                 } else {
-                    // LAYER 1B: THE HERO FOCUS VIEW
+                    // LAYER 1B: FLUID LEGACY HERO FOCUS VIEW
                     val transformableState = rememberTransformableState { zoomChange, offsetChange, _ ->
                         scale = (scale * zoomChange).coerceIn(1f, 4f)
-                        offset += offsetChange
+                        
+                        if (scale <= 1f) {
+                            offset = Offset.Zero
+                        } else {
+                            offset += offsetChange
+                        }
                     }
 
-                    val assetSuffix = if (show360) "_360.png" else "_front.png"
-                    val targetFile = focusedStyle!!.replace("_front.png", assetSuffix)
-                    val assetPath = "$basePath/$targetFile"
+                    val viewType = if (show360) "360" else "front"
+                    val fileName = "${shapeLower}_solid_${viewType}_${focusedStyleId}.webp"
+                    val localCacheFile = java.io.File(context.filesDir, "catalog_matrix_cache/$fileName")
 
-                    val lookbookBitmap = remember(assetPath) {
-                        try { BitmapFactory.decodeStream(context.assets.open(assetPath)) } catch (_: Exception) { null }
+                    val heroBitmap = remember(localCacheFile.absolutePath, viewType, focusedStyleId) {
+                        try {
+                            if (localCacheFile.exists()) {
+                                BitmapFactory.decodeFile(localCacheFile.absolutePath)
+                            } else {
+                                // Fallback to legacy structure matching file extensions
+                                val fallbackPath = "hair_models/${shapeLower}_face/${viewType}/${shapeLower}_solid_${viewType}_${focusedStyleId}.webp"
+                                BitmapFactory.decodeStream(context.assets.open(fallbackPath))
+                            }
+                        } catch (_: Exception) { null }
                     }
 
-                    if (lookbookBitmap != null) {
-                        Image(
-                            bitmap = lookbookBitmap.asImageBitmap(),
-                            contentDescription = "Focused Style",
+                    if (heroBitmap != null) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(bottom = 180.dp)
-                                .graphicsLayer(
-                                    scaleX = scale,
-                                    scaleY = scale,
-                                    translationX = offset.x,
-                                    translationY = offset.y
-                                )
-                                .transformable(state = transformableState)
-                        )
+                                .padding(bottom = 180.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            androidx.compose.foundation.Image(
+                                bitmap = heroBitmap.asImageBitmap(),
+                                contentDescription = "Focused Style",
+                                contentScale = ContentScale.Fit, // Guarantees clear rendering with zero squishing
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f) // Binds rendering metrics to pure 1:1 square boundaries
+                                    .graphicsLayer(
+                                        scaleX = scale,
+                                        scaleY = scale,
+                                        translationX = offset.x,
+                                        translationY = offset.y
+                                    )
+                                    .transformable(state = transformableState)
+                            )
+                        }
                     }
 
-                    // Top Action Bar for Hero View
                     Row(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -407,7 +487,7 @@ fun CyberpunkScanner(hasPermission: Boolean) {
                     ) {
                         Button(
                             onClick = {
-                                focusedStyle = null
+                                focusedStyleId = null
                                 show360 = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
@@ -476,7 +556,6 @@ fun CyberpunkScanner(hasPermission: Boolean) {
 fun CameraPreview(
     imageCapture: ImageCapture,
     faceLandmarker: FaceLandmarker?,
-    lensFacing: Int,
     onAlignmentChange: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
@@ -505,9 +584,7 @@ fun CameraPreview(
                                     val bitmap = imageProxy.toBitmap()
                                     val matrix = Matrix().apply {
                                         postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
-                                        if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-                                            postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
-                                        }
+                                        postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
                                     }
                                     val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                                     val argbBitmap = rotatedBitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -527,7 +604,7 @@ fun CameraPreview(
                         }
                     }
 
-                val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+                val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
 
                 try {
                     cameraProvider.unbindAll()
